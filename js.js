@@ -19,7 +19,7 @@ PlayHT.init({
 const fileStream = fs.createWriteStream('turbo-playht.mp3');
 
 // Stream audio from text
-const stream = await PlayHT.stream('dsdsdsdsdsnt!', {
+const stream = await PlayHT.stream('Hello Helen! I love you!', {
   voiceEngine: 'PlayHT2.0-turbo',
   voiceId: 's3://voice-cloning-zero-shot/d9ff78ba-d016-47f6-b0ef-dd630f59414e/female-cs/manifest.json',
   outputFormat: 'mp3',
@@ -28,7 +28,7 @@ const stream = await PlayHT.stream('dsdsdsdsdsnt!', {
 });
 
 // Pipe stream into file
-// stream.pipe(fileStream);
+stream.pipe(fileStream);
 
 // // клон голоса
 // // Load an audio file
