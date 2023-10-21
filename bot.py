@@ -6,13 +6,38 @@ import pyttsx3
 import speech_recognition as sr
 import soundfile as sf
 from pydub import AudioSegment
+from elevenlabs import set_api_key, voices, generate, save
+from elevenlabs.api import Voice, Models
+
+API_KEY = ''
+set_api_key(API_KEY)
+voice_id_serg = ''
+voice_id_helena = ''
+voice_id_kirk = ''
+
+# voices = voices()
+
+voice = Voice.from_id(voice_id_kirk)
+voice.settings.stability = 0.3
+
+def generate_my_voice(text):
+    audio = generate(
+        text=text,                # Defautls to env variable ELEVEN_API_KEY, or None if not set but quota will be limited
+        voice=voice,                 # Either a voice name, voice_id, or Voice object (use voice object to control stability and similarity_boost)
+        model="eleven_multilingual_v2",                                  # [1-4] the higher the more optimized for streaming latency (only works with stream=True)
+    )
+
+    save(
+        audio=audio,               # Audio bytes (returned by generate)
+        filename='sergey_answer.wav'               # Filename to save audio to (e.g. "sergey_answer.wav")
+    )
 
 g4f.logging = True # enable logging
 g4f.check_version = False # Disable automatic version checking
 
 bot = telebot.TeleBot('')
 
-engine = pyttsx3.init()
+# engine = pyttsx3.init()
 
 def get_answer(message):       
     response = g4f.ChatCompletion.create(
@@ -46,9 +71,10 @@ def get_text_messages(message):
         answer = get_answer(message.text)
         bot.send_message(message.from_user.id, f'{answer}', parse_mode='Markdown') # Отправка файла в чат
         # Воспроизводим речь
-        engine.save_to_file(f'{answer}', 'answer.wav')
-        engine.runAndWait()  
-        bot.send_document(message.from_user.id, document=open("answer.wav", "rb"))
+        # engine.save_to_file(f'{answer}', 'answer.wav')
+        # engine.runAndWait()  
+        generate_my_voice(answer)
+        bot.send_document(message.from_user.id, document=open("sergey_answer.wav", "rb"))
         # bot.send_audio(message.from_user.id, audio=open("answer.wav", "rb"))
     
 @bot.message_handler(content_types=['voice'])
@@ -76,9 +102,10 @@ def handle_voice_message(message):
         
         
         bot.send_message(message.from_user.id, 'Проговорю вам ответ...', parse_mode='Markdown') # Отправка файла в чат
-        engine.save_to_file(f'{answer_from_voice}', 'answer_from_voice.wav')
-        engine.runAndWait()  
-        bot.send_document(message.from_user.id, document=open("answer_from_voice.wav", "rb"))
+        # engine.save_to_file(f'{answer_from_voice}', 'answer_from_voice.wav')
+        # engine.runAndWait()
+        generate_my_voice(answer_from_voice)
+        bot.send_document(message.from_user.id, document=open("sergey_answer.wav", "rb"))
 
 # Обработчик аудиосообщений
 @bot.message_handler(content_types=['audio'])
